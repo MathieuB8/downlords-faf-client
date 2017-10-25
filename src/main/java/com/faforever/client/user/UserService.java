@@ -22,4 +22,6 @@ public interface UserService {
   ReadOnlyStringProperty currentUserProperty();
 
   CompletableTask<Void> changePassword(String currentPassword, String newPassword);
+
+  CompletableFuture<Void> changeUsername(String text);
 }

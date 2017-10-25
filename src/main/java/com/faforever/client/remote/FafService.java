@@ -143,4 +143,6 @@ public interface FafService {
   CompletableFuture<Void> deleteMapVersionReview(Review review);
 
   CompletableFuture<Optional<Replay>> findReplayById(int id);
+
+  CompletableFuture<Void> changeUsername(String name);
 }

@@ -267,6 +267,11 @@ public class PlayerServiceImpl implements PlayerService {
     return fafService.getPlayersByIds(playerIds);
   }
 
+  @Override
+  public void changeUsername(String text) {
+
+  }
+
   private void onPlayersInfo(PlayersMessage playersMessage) {
     playersMessage.getPlayers().forEach(this::onPlayerInfo);
   }

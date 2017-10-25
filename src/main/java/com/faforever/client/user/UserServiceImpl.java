@@ -131,6 +131,11 @@ public class UserServiceImpl implements UserService {
     return taskService.submitTask(changePasswordTask);
   }
 
+  @Override
+  public CompletableFuture<Void> changeUsername(String name) {
+    return fafService.changeUsername(name);
+  }
+
   @PostConstruct
   void postConstruct() {
     fafService.addOnMessageListener(LoginMessage.class, loginInfo -> userId = loginInfo.getId());

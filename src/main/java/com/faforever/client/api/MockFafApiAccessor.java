@@ -251,6 +251,11 @@ public class MockFafApiAccessor implements FafApiAccessor {
   }
 
   @Override
+  public void changeUsername(String name) {
+
+  }
+
+  @Override
   public void changePassword(String username, String currentPasswordHash, String newPasswordHash) {
 
   }

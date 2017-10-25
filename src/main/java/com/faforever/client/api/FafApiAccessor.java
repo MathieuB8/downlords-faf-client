@@ -114,4 +114,5 @@ public interface FafApiAccessor {
 
   Optional<Game> findReplayById(int id);
 
+  void changeUsername(String name);
 }

@@ -21,11 +21,14 @@ import javafx.beans.property.SimpleSetProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.collections.ObservableSet;
 
 import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static com.faforever.client.chat.SocialStatus.OTHER;
 
@@ -52,6 +55,7 @@ public class Player {
   private final SimpleObjectProperty<PlayerStatus> status;
   private final IntegerProperty numberOfGames;
   private final ObjectProperty<Instant> idleSince;
+  private final ObservableList<NameRecord> names;
 
   public Player(com.faforever.client.remote.domain.Player player) {
     this();
@@ -84,6 +88,7 @@ public class Player {
     numberOfGames = new SimpleIntegerProperty();
     socialStatus = new SimpleObjectProperty<>(OTHER);
     idleSince = new SimpleObjectProperty<>(Instant.now());
+    names = FXCollections.observableArrayList();
   }
 
   public Player(String username) {
@@ -99,7 +104,12 @@ public class Player {
     player.setGlobalRatingDeviation(Optional.ofNullable(dto.getGlobalRating()).map(GlobalRating::getDeviation).orElse(0d).floatValue());
     player.setLeaderboardRatingMean(Optional.ofNullable(dto.getLadder1v1Rating()).map(Ladder1v1Rating::getMean).orElse(0d).floatValue());
     player.setLeaderboardRatingDeviation(Optional.ofNullable(dto.getLadder1v1Rating()).map(Ladder1v1Rating::getDeviation).orElse(0d).floatValue());
+    player.getNames().addAll(dto.getNames().stream().map(NameRecord::fromDto).collect(Collectors.toList()));
     return player;
+  }
+
+  public ObservableList<NameRecord> getNames() {
+    return names;
   }
 
   public SocialStatus getSocialStatus() {
@@ -348,6 +358,47 @@ public class Player {
     if (player.getAvatar() != null) {
       setAvatarUrl(player.getAvatar().getUrl());
       setAvatarTooltip(player.getAvatar().getTooltip());
+    }
+  }
+
+  public static class NameRecord {
+    private final StringProperty name;
+    private final ObjectProperty<OffsetDateTime> changeDate;
+
+    private NameRecord() {
+      this.name = new SimpleStringProperty();
+      this.changeDate = new SimpleObjectProperty<>();
+    }
+
+    private static NameRecord fromDto(com.faforever.client.api.dto.NameRecord dto) {
+      NameRecord nameRecord = new NameRecord();
+      nameRecord.setName(dto.getName());
+      nameRecord.setChangeDate(dto.getChangeTime());
+      return nameRecord;
+    }
+
+    public String getName() {
+      return name.get();
+    }
+
+    public void setName(String name) {
+      this.name.set(name);
+    }
+
+    public StringProperty nameProperty() {
+      return name;
+    }
+
+    public OffsetDateTime getChangeDate() {
+      return changeDate.get();
+    }
+
+    public void setChangeDate(OffsetDateTime changeDate) {
+      this.changeDate.set(changeDate);
+    }
+
+    public ObjectProperty<OffsetDateTime> changeDateProperty() {
+      return changeDate;
     }
   }
 }

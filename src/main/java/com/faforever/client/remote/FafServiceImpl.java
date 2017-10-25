@@ -453,6 +453,13 @@ public class FafServiceImpl implements FafService {
 
   @Override
   @Async
+  public CompletableFuture<Void> changeUsername(String name) {
+    fafApiAccessor.changeUsername(name);
+    return CompletableFuture.completedFuture(null);
+  }
+
+  @Override
+  @Async
   public CompletableFuture<Optional<Clan>> getClanByTag(String tag) {
     return CompletableFuture.completedFuture(fafApiAccessor.getClanByTag(tag)
         .map(Clan::fromDto));

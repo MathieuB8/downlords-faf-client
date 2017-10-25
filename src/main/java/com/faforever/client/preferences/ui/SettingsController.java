@@ -8,6 +8,7 @@ import com.faforever.client.notification.Action;
 import com.faforever.client.notification.NotificationService;
 import com.faforever.client.notification.PersistentNotification;
 import com.faforever.client.notification.Severity;
+import com.faforever.client.player.UsernameChangeController;
 import com.faforever.client.preferences.LanguageInfo;
 import com.faforever.client.preferences.LocalizationPrefs;
 import com.faforever.client.preferences.NotificationsPrefs;
@@ -98,7 +99,6 @@ public class SettingsController implements Controller<Node> {
   public ToggleButton topRightToastButton;
   public ToggleButton topLeftToastButton;
   public ToggleButton bottomRightToastButton;
-  public TextField usernameField;
   public PasswordField currentPasswordField;
   public PasswordField newPasswordField;
   public PasswordField confirmPasswordField;
@@ -106,6 +106,7 @@ public class SettingsController implements Controller<Node> {
   public Label passwordChangeErrorLabel;
   public Label passwordChangeSuccessLabel;
   private ChangeListener<Theme> themeChangeListener;
+  public UsernameChangeController usernameChangeController;
 
   @Inject
   public SettingsController(UserService userService, PreferencesService preferencesService, UiService uiService,
@@ -151,6 +152,7 @@ public class SettingsController implements Controller<Node> {
     eventBus.register(this);
     themeComboBox.setButtonCell(new StringListCell<>(Theme::getDisplayName));
     themeComboBox.setCellFactory(param -> new StringListCell<>(Theme::getDisplayName));
+    usernameChangeController.setDisplayPlayer(userService.currentUserProperty());
 
     toastScreenComboBox.setButtonCell(screenListCell());
     toastScreenComboBox.setCellFactory(param -> screenListCell());
@@ -230,7 +232,6 @@ public class SettingsController implements Controller<Node> {
     executableDecoratorField.textProperty().bindBidirectional(preferences.getForgedAlliance().executableDecoratorProperty());
     executionDirectoryField.textProperty().bindBidirectional(preferences.getForgedAlliance().executionDirectoryProperty(), PATH_STRING_CONVERTER);
 
-    usernameField.textProperty().bind(userService.currentUserProperty());
     passwordChangeErrorLabel.setVisible(false);
   }
 

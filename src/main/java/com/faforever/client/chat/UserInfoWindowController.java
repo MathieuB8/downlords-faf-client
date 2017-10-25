@@ -9,16 +9,22 @@ import com.faforever.client.api.dto.PlayerEvent;
 import com.faforever.client.domain.RatingHistoryDataPoint;
 import com.faforever.client.events.EventService;
 import com.faforever.client.fx.Controller;
+import com.faforever.client.fx.OffsetDateTimeCell;
+import com.faforever.client.fx.StringCell;
 import com.faforever.client.fx.WindowController;
 import com.faforever.client.game.KnownFeaturedMod;
 import com.faforever.client.i18n.I18n;
 import com.faforever.client.player.Player;
+import com.faforever.client.player.Player.NameRecord;
+import com.faforever.client.player.UsernameChangeController;
 import com.faforever.client.preferences.PreferencesService;
+import com.faforever.client.remote.FafService;
 import com.faforever.client.stats.StatisticsService;
 import com.faforever.client.theme.UiService;
 import com.faforever.client.util.Assert;
 import com.faforever.client.util.IdenticonUtil;
 import com.faforever.client.util.RatingUtil;
+import com.faforever.client.util.TimeService;
 import com.neovisionaries.i18n.CountryCode;
 import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
@@ -34,6 +40,8 @@ import javafx.scene.chart.XYChart;
 import javafx.scene.chart.XYChart.Data;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
@@ -50,6 +58,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import javax.inject.Inject;
+import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.HashMap;
@@ -91,6 +100,8 @@ public class UserInfoWindowController implements Controller<Node> {
   private final EventService eventService;
   private final I18n i18n;
   private final UiService uiService;
+  private final FafService fafService;
+  private final TimeService timeService;
   public Label lockedAchievementsHeaderLabel;
   public Label unlockedAchievementsHeaderLabel;
   public PieChart gamesPlayedChart;
@@ -120,6 +131,10 @@ public class UserInfoWindowController implements Controller<Node> {
   public Label countryLabel;
   public ImageView countryImageView;
   public Pane userInfoRoot;
+  public TableView<NameRecord> nameHistoryTable;
+  public TableColumn<NameRecord, OffsetDateTime> changeDateColumn;
+  public TableColumn<NameRecord, String> nameColumn;
+  public UsernameChangeController usernameChangeController;
   private Player player;
   private Map<String, AchievementItemController> achievementItemById;
   private Map<String, AchievementDefinition> achievementDefinitionById;
@@ -128,13 +143,15 @@ public class UserInfoWindowController implements Controller<Node> {
   @Inject
   public UserInfoWindowController(StatisticsService statisticsService, CountryFlagService countryFlagService,
                                   AchievementService achievementService, EventService eventService,
-                                  PreferencesService preferencesService, I18n i18n, UiService uiService) {
+                                  PreferencesService preferencesService, I18n i18n, UiService uiService, FafService fafService, TimeService timeService) {
     this.statisticsService = statisticsService;
     this.countryFlagService = countryFlagService;
     this.achievementService = achievementService;
     this.eventService = eventService;
     this.i18n = i18n;
     this.uiService = uiService;
+    this.fafService = fafService;
+    this.timeService = timeService;
 
     achievementItemById = new HashMap<>();
     achievementDefinitionById = new HashMap<>();
@@ -148,6 +165,7 @@ public class UserInfoWindowController implements Controller<Node> {
     loadingProgressLabel.managedProperty().bind(loadingProgressLabel.visibleProperty());
     achievementsPane.managedProperty().bind(achievementsPane.visibleProperty());
     mostRecentAchievementPane.managedProperty().bind(mostRecentAchievementPane.visibleProperty());
+    usernameChangeController.getRoot().managedProperty().bind(usernameChangeController.getRoot().visibleProperty());
 
     unlockedAchievementsHeader.managedProperty().bind(unlockedAchievementsHeader.visibleProperty());
     unlockedAchievementsHeader.visibleProperty().bind(unlockedAchievementsContainer.visibleProperty());
@@ -178,6 +196,10 @@ public class UserInfoWindowController implements Controller<Node> {
         });
       }
     });
+    nameColumn.setCellValueFactory(param -> param.getValue().nameProperty());
+    nameColumn.setCellFactory(param -> new StringCell<>(s -> s));
+    changeDateColumn.setCellValueFactory(param -> param.getValue().changeDateProperty());
+    changeDateColumn.setCellFactory(param -> new OffsetDateTimeCell<>(timeService));
   }
 
   public Region getRoot() {
@@ -207,6 +229,11 @@ public class UserInfoWindowController implements Controller<Node> {
     ratingLabelGlobal.setText(i18n.number(RatingUtil.getGlobalRating(player)));
     ratingLabel1v1.setText(i18n.number(RatingUtil.getLeaderboardRating(player)));
 
+    updateNameHistory(player);
+    usernameChangeController.setDisplayPlayer(player.usernameProperty());
+    usernameChangeController.registerOnNameChangedCallback(() -> Platform.runLater(() -> updateNameHistory(player)));
+
+
     CountryCode countryCode = CountryCode.getByCode(player.getCountry());
     if (countryCode != null) {
       // Country code is unknown to CountryCode, like A1 or A2 (from GeoIP)
@@ -230,6 +257,11 @@ public class UserInfoWindowController implements Controller<Node> {
           log.warn("Could not load player events", throwable);
           return null;
         });
+  }
+
+  private void updateNameHistory(Player player) {
+    fafService.getPlayersByIds(Collections.singletonList(player.getId()))
+        .thenAccept(players -> nameHistoryTable.setItems(players.get(0).getNames()));
   }
 
   private void loadAchievements() {

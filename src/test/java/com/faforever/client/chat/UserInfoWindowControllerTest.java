@@ -11,9 +11,11 @@ import com.faforever.client.game.KnownFeaturedMod;
 import com.faforever.client.i18n.I18n;
 import com.faforever.client.player.PlayerBuilder;
 import com.faforever.client.preferences.PreferencesService;
+import com.faforever.client.remote.FafService;
 import com.faforever.client.stats.StatisticsService;
 import com.faforever.client.test.AbstractPlainJavaFxTest;
 import com.faforever.client.theme.UiService;
+import com.faforever.client.util.TimeService;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -58,10 +60,14 @@ public class UserInfoWindowControllerTest extends AbstractPlainJavaFxTest {
   private PreferencesService preferencesService;
   @Mock
   private AchievementItemController achievementItemController;
+  @Mock
+  private FafService fafService;
+  @Mock
+  private TimeService timeService;
 
   @Before
   public void setUp() throws Exception {
-    instance = new UserInfoWindowController(statisticsService, countryFlagService, achievementService, eventService, preferencesService, i18n, uiService);
+    instance = new UserInfoWindowController(statisticsService, countryFlagService, achievementService, eventService, preferencesService, i18n, uiService, fafService, timeService);
 
     when(uiService.loadFxml("theme/achievement_item.fxml")).thenReturn(achievementItemController);
 
