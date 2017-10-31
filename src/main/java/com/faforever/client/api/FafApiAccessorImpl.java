@@ -390,7 +390,7 @@ public class FafApiAccessorImpl implements FafApiAccessor {
 
   @Override
   public void changeUsername(String name) {
-    //post("users/changeUsername?newUsername="+name, null,false);
+    post("users/changeUsername?newUsername=" + name, "", false);
   }
 
   @Override

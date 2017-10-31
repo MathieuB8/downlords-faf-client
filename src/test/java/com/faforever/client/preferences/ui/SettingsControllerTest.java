@@ -3,6 +3,7 @@ package com.faforever.client.preferences.ui;
 import com.faforever.client.i18n.I18n;
 import com.faforever.client.notification.NotificationService;
 import com.faforever.client.notification.PersistentNotification;
+import com.faforever.client.player.UsernameChangeController;
 import com.faforever.client.preferences.LanguageInfo;
 import com.faforever.client.preferences.Preferences;
 import com.faforever.client.preferences.PreferencesService;
@@ -39,6 +40,9 @@ public class SettingsControllerTest extends AbstractPlainJavaFxTest {
   private I18n i18n;
   @Mock
   private NotificationService notificationService;
+  @Mock
+  private UsernameChangeController usernameChangeController;
+
   private Preferences preferences;
 
   @Before
@@ -49,7 +53,13 @@ public class SettingsControllerTest extends AbstractPlainJavaFxTest {
     when(userService.currentUserProperty()).thenReturn(new SimpleStringProperty());
 
     instance = new SettingsController(userService, preferenceService, uiService, i18n, eventBus, notificationService);
-    loadFxml("theme/settings/settings.fxml", param -> instance);
+    loadFxml("theme/settings/settings.fxml", clazz -> {
+      if (clazz == UsernameChangeController.class) {
+        return usernameChangeController;
+      }
+
+      return instance;
+    });
   }
 
   @Test

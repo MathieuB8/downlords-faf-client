@@ -9,13 +9,16 @@ import com.faforever.client.domain.RatingHistoryDataPoint;
 import com.faforever.client.events.EventService;
 import com.faforever.client.game.KnownFeaturedMod;
 import com.faforever.client.i18n.I18n;
+import com.faforever.client.player.Player;
 import com.faforever.client.player.PlayerBuilder;
+import com.faforever.client.player.UsernameChangeController;
 import com.faforever.client.preferences.PreferencesService;
 import com.faforever.client.remote.FafService;
 import com.faforever.client.stats.StatisticsService;
 import com.faforever.client.test.AbstractPlainJavaFxTest;
 import com.faforever.client.theme.UiService;
 import com.faforever.client.util.TimeService;
+import javafx.scene.layout.Pane;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -23,6 +26,7 @@ import org.mockito.Mock;
 import java.time.OffsetDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.concurrent.CompletableFuture;
 
@@ -64,19 +68,28 @@ public class UserInfoWindowControllerTest extends AbstractPlainJavaFxTest {
   private FafService fafService;
   @Mock
   private TimeService timeService;
+  @Mock
+  private UsernameChangeController usernameChangeController;
 
   @Before
   public void setUp() throws Exception {
     instance = new UserInfoWindowController(statisticsService, countryFlagService, achievementService, eventService, preferencesService, i18n, uiService, fafService, timeService);
 
     when(uiService.loadFxml("theme/achievement_item.fxml")).thenReturn(achievementItemController);
+    when(usernameChangeController.getRoot()).thenReturn(new Pane());
+    when(fafService.getPlayersByIds(any())).thenReturn(CompletableFuture.completedFuture(Collections.singletonList(new Player("abc"))));
 
     when(statisticsService.getRatingHistory(any(), eq(PLAYER_ID))).thenReturn(CompletableFuture.completedFuture(Arrays.asList(
         new RatingHistoryDataPoint(OffsetDateTime.now(), 1500f, 50f),
         new RatingHistoryDataPoint(OffsetDateTime.now().plus(1, ChronoUnit.DAYS), 1500f, 50f)
     )));
 
-    loadFxml("theme/user_info_window.fxml", clazz -> instance);
+    loadFxml("theme/user_info_window.fxml", clazz -> {
+      if (clazz == UsernameChangeController.class) {
+        return usernameChangeController;
+      }
+      return instance;
+    });
   }
 
   @Test

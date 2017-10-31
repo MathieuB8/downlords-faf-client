@@ -313,7 +313,7 @@
                   </TableView>
               </VBox>
               <graphic>
-                  <Label styleClass="icon" text=""/>
+                  <Label styleClass="icon" text=""/>
               </graphic>
           </Tab>
       </tabs>
