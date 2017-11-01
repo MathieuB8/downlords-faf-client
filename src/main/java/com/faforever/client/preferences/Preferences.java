@@ -1,12 +1,15 @@
 package com.faforever.client.preferences;
 
+import com.faforever.client.game.GamesTilesContainerController.TilesSortingOrder;
 import com.faforever.client.game.KnownFeaturedMod;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ListProperty;
+import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleListProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.ObservableList;
@@ -38,10 +41,13 @@ public class Preferences {
   private final NewsPrefs news;
   private final DeveloperPrefs developer;
   private final ListProperty<Pair<String, SortType>> gameListSorting;
+  private final ObjectProperty<TilesSortingOrder> gameTileSortingOrder;
 
   public Preferences() {
+    gameTileSortingOrder = new SimpleObjectProperty<>(TilesSortingOrder.PLAYER_DES);
     chat = new ChatPrefs();
     login = new LoginPrefs();
+
     localization = new LocalizationPrefs();
     mainWindow = new WindowPrefs();
     forgedAlliance = new ForgedAlliancePrefs();
@@ -59,6 +65,18 @@ public class Preferences {
     news = new NewsPrefs();
     developer = new DeveloperPrefs();
     gameListSorting = new SimpleListProperty<>(observableArrayList());
+  }
+
+  public TilesSortingOrder getGameTileSortingOrder() {
+    return gameTileSortingOrder.get();
+  }
+
+  public void setGameTileSortingOrder(TilesSortingOrder gameTileTilesSortingOrder) {
+    this.gameTileSortingOrder.set(gameTileTilesSortingOrder);
+  }
+
+  public ObjectProperty<TilesSortingOrder> gameTileSortingOrderProperty() {
+    return gameTileSortingOrder;
   }
 
   public String getGamesViewMode() {
@@ -208,4 +226,5 @@ public class Preferences {
   public ObservableList<Pair<String, SortType>> getGameListSorting() {
     return gameListSorting.get();
   }
+
 }
